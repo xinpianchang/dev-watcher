@@ -1,8 +1,8 @@
 package watcher
 
 import (
-	"testing"
 	"sync/atomic"
+	"testing"
 	"time"
 )
 
@@ -15,7 +15,7 @@ func TestNewDebounce(t *testing.T) {
 		atomic.AddInt32(&count, 1)
 	}
 
-	fn := NewDebounce(100 * time.Millisecond, f1)
+	fn := NewDebounce(100*time.Millisecond, f1)
 
 	for i := 0; i < 10; i++ {
 		fn()

@@ -5,7 +5,7 @@ import (
 )
 
 // NewDebounce returns a debounced function
-func NewDebounce(d time.Duration, fn func()) (func()) {
+func NewDebounce(d time.Duration, fn func()) func() {
 	last := time.Now().Add(-d)
 	return func() {
 		now := time.Now()

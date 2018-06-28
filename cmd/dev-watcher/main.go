@@ -3,30 +3,30 @@ package main
 import (
 	"flag"
 	"fmt"
-	"runtime"
+	"github.com/fsnotify/fsnotify"
+	pkg "github.com/xinpianchang/dev-watcher/watcher"
 	"log"
 	"os"
-	"github.com/fsnotify/fsnotify"
-	"path/filepath"
-	"strings"
-	"time"
-	pkg "github.com/xinpianchang/dev-watcher/watcher"
 	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"sync"
+	"time"
 )
 
 var (
 	Build = "devel"
 
-	dir = flag.String("d", ".", "folder to watch.")
+	dir     = flag.String("d", ".", "folder to watch.")
 	filters = flag.String("f", "*", "filter file extension, multiple extensions separated by commas.")
-	wait = flag.Int64("t", 2000, "postpone shell execution until after wait milliseconds.")
-	script = flag.String("s", "./.dev-watcher.sh", "shell script file which executed after file changed.")
+	wait    = flag.Int64("t", 2000, "postpone shell execution until after wait milliseconds.")
+	script  = flag.String("s", "./.dev-watcher.sh", "shell script file which executed after file changed.")
 
 	V = flag.Bool("version", false, "show version")
 	H = flag.Bool("help", false, "show help")
 
-	cmd *exec.Cmd
+	cmd     *exec.Cmd
 	cmdLock sync.Mutex
 
 	l = log.New(os.Stdout, "[dev-watcher] ", log.LstdFlags)
@@ -57,20 +57,20 @@ func main() {
 	}
 	defer watcher.Close()
 
-	debounceShellExecutor := pkg.NewDebounce(time.Millisecond * time.Duration(*wait), shellExecutor)
+	debounceShellExecutor := pkg.NewDebounce(time.Millisecond*time.Duration(*wait), shellExecutor)
 
 	go func() {
 		fileFilter := newFilter(*filters)
 
 		for {
 			select {
-			case event := <- watcher.Events:
-				if event.Op & fsnotify.Create == fsnotify.Create ||
-				   event.Op & fsnotify.Remove == fsnotify.Remove ||
-				   event.Op & fsnotify.Rename == fsnotify.Rename ||
-				   event.Op & fsnotify.Write == fsnotify.Write {
+			case event := <-watcher.Events:
+				if event.Op&fsnotify.Create == fsnotify.Create ||
+					event.Op&fsnotify.Remove == fsnotify.Remove ||
+					event.Op&fsnotify.Rename == fsnotify.Rename ||
+					event.Op&fsnotify.Write == fsnotify.Write {
 
-				   	if info, err := os.Stat(event.Name); err == nil {
+					if info, err := os.Stat(event.Name); err == nil {
 						if info.IsDir() {
 							continue
 						}
