@@ -84,12 +84,18 @@ func main() {
 		}
 	}()
 
+	ignoreDirs := []string{"vendor", ".git", ".idea", "dist"}
 	filepath.Walk(*dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if info.IsDir() {
+			for _, dir := range ignoreDirs {
+				if strings.Contains(path, dir) {
+					return nil
+				}
+			}
 			err = watcher.Add(path)
 			if err != nil {
 				l.Println("add watcher error:", err)
